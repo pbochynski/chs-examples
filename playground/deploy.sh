@@ -33,7 +33,7 @@ RESPONSE=$(curl -sS -w '\n__HTTP_STATUS:%{http_code}' -X PUT \
         },
         "env": [
           {"name": "JWT_SECRET", "value": "ch-playground-demo-secret"},
-          {"name": "SANDBOX_HOST", "value": "sandbox-sandbox-router:8080"}
+          {"name": "SANDBOX_HOST", "value": "sandbox:8080"}
         ],
         "requires": ["sandbox"]
       },

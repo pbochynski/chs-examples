@@ -67,7 +67,7 @@ JWT_SECRET=dev SANDBOX_HOST=localhost:8080 uvicorn main:app --port 8000
 ```
 Browser
   └─▶ app (FastAPI + SPA, kind: service, port 8000)
-           │  SANDBOX_HOST env var → sandbox-sandbox-router:8080
+           │  SANDBOX_HOST env var → sandbox:8080
            └─▶ sandbox (Python runner, kind: agent, port 8080)
                         sandboxing.tenantClaim: sub
                         → one container per session ID
