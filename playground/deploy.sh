@@ -33,10 +33,11 @@ echo "    Source name: $SOURCE_NAME"
 
 echo "==> Waiting for build (status: pending → scanning → building → ready)..."
 while true; do
-  STATUS_JSON=$(curl -sf \
+  STATUS_JSON=$(curl -sS \
     -H "Authorization: Bearer $CH_TOKEN" \
     "$CH_BASE_URL/projects/$CH_PROJECT/sources/$SOURCE_NAME")
-  STATUS=$(echo "$STATUS_JSON" | python3 -c "import sys,json; print(json.load(sys.stdin)['status'])")
+  echo "    raw: $STATUS_JSON"
+  STATUS=$(echo "$STATUS_JSON" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('status') or d.get('state') or d.get('buildStatus') or 'unknown')")
   printf "    status: %s\n" "$STATUS"
   case "$STATUS" in
     ready) break ;;
