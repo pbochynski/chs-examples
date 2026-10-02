@@ -7,6 +7,7 @@ set -euo pipefail
 : "${CH_PROJECT:?set CH_PROJECT to your project ID}"
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SOURCE_NAME="playground-$(date +%Y%m%d-%H%M%S)"
 ZIP_FILE="$(mktemp /tmp/playground-XXXXXX).zip"
 trap 'rm -f "$ZIP_FILE"' EXIT
 
@@ -18,7 +19,7 @@ echo "    ZIP: $(du -h "$ZIP_FILE" | cut -f1)"
 echo "==> Uploading source..."
 UPLOAD=$(curl -sS -w '\n__HTTP_STATUS:%{http_code}' -X POST \
   -H "Authorization: Bearer $CH_TOKEN" \
-  -F "name=playground" \
+  -F "name=$SOURCE_NAME" \
   -F "file=@$ZIP_FILE" \
   "$CH_BASE_URL/projects/$CH_PROJECT/sources")
 HTTP_STATUS=$(echo "$UPLOAD" | grep -o '__HTTP_STATUS:[0-9]*' | cut -d: -f2)
@@ -28,7 +29,7 @@ if [[ "$HTTP_STATUS" != 2* ]]; then
   echo "$UPLOAD_BODY"
   exit 1
 fi
-SOURCE_NAME=$(echo "$UPLOAD_BODY" | python3 -c "import sys,json; print(json.load(sys.stdin)['name'])")
+SOURCE_NAME=$(echo "$UPLOAD_BODY" | python3 -c "import sys,json; print(json.load(sys.stdin).get('name', '$SOURCE_NAME'))")
 echo "    Source name: $SOURCE_NAME"
 
 echo "==> Waiting for build (status: pending → scanning → building → ready)..."
@@ -36,7 +37,6 @@ while true; do
   STATUS_JSON=$(curl -sS \
     -H "Authorization: Bearer $CH_TOKEN" \
     "$CH_BASE_URL/projects/$CH_PROJECT/sources/$SOURCE_NAME")
-  echo "    raw: $STATUS_JSON"
   STATUS=$(echo "$STATUS_JSON" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('status') or d.get('state') or d.get('buildStatus') or 'unknown')")
   printf "    status: %s\n" "$STATUS"
   case "$STATUS" in
