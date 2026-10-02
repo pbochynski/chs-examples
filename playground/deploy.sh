@@ -16,12 +16,19 @@ echo "==> Packaging playground..."
 echo "    ZIP: $(du -h "$ZIP_FILE" | cut -f1)"
 
 echo "==> Uploading source..."
-UPLOAD=$(curl -sf -X POST \
+UPLOAD=$(curl -sS -w '\n__HTTP_STATUS:%{http_code}' -X POST \
   -H "Authorization: Bearer $CH_TOKEN" \
   -F "file=@$ZIP_FILE" \
   -F "name=playground" \
   "$CH_BASE_URL/projects/$CH_PROJECT/sources")
-SOURCE_NAME=$(echo "$UPLOAD" | python3 -c "import sys,json; print(json.load(sys.stdin)['name'])")
+HTTP_STATUS=$(echo "$UPLOAD" | grep -o '__HTTP_STATUS:[0-9]*' | cut -d: -f2)
+UPLOAD_BODY=$(echo "$UPLOAD" | sed 's/__HTTP_STATUS:[0-9]*$//')
+if [[ "$HTTP_STATUS" != 2* ]]; then
+  echo "ERROR: upload failed (HTTP $HTTP_STATUS):"
+  echo "$UPLOAD_BODY"
+  exit 1
+fi
+SOURCE_NAME=$(echo "$UPLOAD_BODY" | python3 -c "import sys,json; print(json.load(sys.stdin)['name'])")
 echo "    Source name: $SOURCE_NAME"
 
 echo "==> Waiting for build (status: pending → scanning → building → ready)..."
