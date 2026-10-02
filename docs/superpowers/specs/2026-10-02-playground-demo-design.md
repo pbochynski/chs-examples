@@ -167,6 +167,8 @@ spec:
       env:
         - name: JWT_SECRET
           value: change-me-in-prod
+        - name: SANDBOX_HOST
+          value: sandbox-sandbox-router:8080   # agent Service is <id>-sandbox-router
       requires:
         - sandbox
 
@@ -179,7 +181,7 @@ spec:
           value: change-me-in-prod
       sandboxing:
         tenantClaim: sub
-        idleTTL: 10m
+        idleTTL: 1m
       network:
         egress:
           allowedHosts: ["pypi.org", "files.pythonhosted.org", "example.com"]
@@ -239,7 +241,13 @@ so no `kubectl` is needed — the deploy script is pure `curl`.
 
 - Build API: confirm single ZIP with `build-config.json` produces two separate image
   refs (one per asset type). Validate during implementation.
-- `REQUIRES_SANDBOX_HOST` injection: confirm the env var name convention for asset id
-  `sandbox` → `REQUIRES_SANDBOX_HOST` (not `REQUIRES_SANDBOX_HOST_PORT` etc.).
 - Egress allowlist: confirm `pypi.org` + `files.pythonhosted.org` are sufficient for
   `pip install` inside the sandbox, or if more hosts are needed.
+
+## Known Platform Quirk
+
+`REQUIRES_<ID>_HOST` for an `agent` asset injects the value `<id>` (e.g. `sandbox`),
+but the actual k8s Service created for the sandbox-router is `<id>-sandbox-router`
+(e.g. `sandbox-sandbox-router`). The env var therefore resolves to a non-existent
+service. Workaround: set `SANDBOX_HOST=sandbox-sandbox-router:8080` explicitly in
+`solution.yaml` and read that in `app/main.py` instead of `REQUIRES_SANDBOX_HOST`.
