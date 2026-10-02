@@ -52,7 +52,7 @@ async def run_code(body: RunRequest):
                 json={"code": body.code},
                 headers={"Authorization": f"Bearer {token}"},
             )
-        except httpx.ConnectError:
+        except (httpx.ConnectError, httpx.ConnectTimeout):
             raise HTTPException(502, "sandbox unreachable")
     if resp.status_code == 401:
         # 401 from sandbox = JWT_SECRET mismatch between app and sandbox env vars
@@ -71,7 +71,7 @@ async def get_status(session_id: str):
                 f"{SANDBOX_URL}/status",
                 headers={"Authorization": f"Bearer {token}"},
             )
-        except httpx.ConnectError:
+        except (httpx.ConnectError, httpx.ConnectTimeout):
             return {"files": [], "workspace_exists": False}
     return resp.json()
 
