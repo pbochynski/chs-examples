@@ -21,13 +21,16 @@ RESPONSE=$(curl -sS -w '\n__HTTP_STATUS:%{http_code}' -X PUT \
   -d '{
   "spec": {
     "version": "1.0.0",
-    "tenant": "demo",
-    "regions": [{"name": "aws-eu-central-1"}],
     "assets": [
       {
-        "id": "app", "kind": "service",
-        "image": "'"$APP_IMAGE"'", "port": 8000,
-        "resources": {"requests": {"cpu": "100m", "memory": "128Mi"}, "limits": {"cpu": "500m", "memory": "256Mi"}},
+        "id": "app",
+        "kind": "service",
+        "image": "'"$APP_IMAGE"'",
+        "port": 8000,
+        "resources": {
+          "requests": {"cpu": "100m", "memory": "128Mi"},
+          "limits": {"cpu": "500m", "memory": "256Mi"}
+        },
         "env": [
           {"name": "JWT_SECRET", "value": "ch-playground-demo-secret"},
           {"name": "SANDBOX_HOST", "value": "sandbox-sandbox-router:8080"}
@@ -35,15 +38,26 @@ RESPONSE=$(curl -sS -w '\n__HTTP_STATUS:%{http_code}' -X PUT \
         "requires": ["sandbox"]
       },
       {
-        "id": "sandbox", "kind": "agent",
-        "image": "'"$SANDBOX_IMAGE"'", "port": 8080,
-        "resources": {"requests": {"cpu": "100m", "memory": "128Mi"}, "limits": {"cpu": "500m", "memory": "256Mi"}},
+        "id": "sandbox",
+        "kind": "agent",
+        "image": "'"$SANDBOX_IMAGE"'",
+        "port": 8080,
+        "resources": {
+          "requests": {"cpu": "100m", "memory": "128Mi"},
+          "limits": {"cpu": "500m", "memory": "256Mi"}
+        },
         "env": [{"name": "JWT_SECRET", "value": "ch-playground-demo-secret"}],
-        "sandboxing": {"tenantClaim": "sub", "idleTTL": "1m"},
-        "network": {"egress": {
-          "allowedHosts": ["pypi.org", "files.pythonhosted.org", "example.com"],
-          "allowedPorts": [443, 80]
-        }}
+        "sandboxing": {
+          "tenantClaim": "sub",
+          "idleTTL": "1m",
+          "network": {
+            "egress": [
+              {"host": "pypi.org", "ports": [443]},
+              {"host": "files.pythonhosted.org", "ports": [443]},
+              {"host": "example.com", "ports": [443, 80]}
+            ]
+          }
+        }
       }
     ]
   }
