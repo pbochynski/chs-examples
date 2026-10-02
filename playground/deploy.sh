@@ -7,7 +7,7 @@ set -euo pipefail
 : "${CH_PROJECT:?set CH_PROJECT to your project ID}"
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-ZIP_FILE="$(mktemp /tmp/playground-XXXXXX.zip)"
+ZIP_FILE="$(mktemp /tmp/playground-XXXXXX).zip"
 trap 'rm -f "$ZIP_FILE"' EXIT
 
 echo "==> Packaging playground..."
