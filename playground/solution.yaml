@@ -6,7 +6,6 @@ metadata:
   name: playground
   namespace: default
 spec:
-  solutionName: playground
   version: 1.0.0
   tenant: demo
   regions:

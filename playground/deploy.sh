@@ -20,7 +20,6 @@ RESPONSE=$(curl -sS -w '\n__HTTP_STATUS:%{http_code}' -X PUT \
   "$CH_BASE_URL/projects/$CH_PROJECT/solutions/playground" \
   -d '{
   "spec": {
-    "solutionName": "playground",
     "version": "1.0.0",
     "tenant": "demo",
     "regions": [{"name": "aws-eu-central-1"}],
