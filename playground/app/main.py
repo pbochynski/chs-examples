@@ -55,7 +55,8 @@ async def run_code(body: RunRequest):
         except httpx.ConnectError:
             raise HTTPException(502, "sandbox unreachable")
     if resp.status_code == 401:
-        raise HTTPException(502, "sandbox auth error")
+        # 401 from sandbox = JWT_SECRET mismatch between app and sandbox env vars
+        raise HTTPException(502, "sandbox auth error — check JWT_SECRET matches in both assets")
     if resp.status_code == 400:
         raise HTTPException(400, resp.json().get("detail", "bad request"))
     return resp.json()

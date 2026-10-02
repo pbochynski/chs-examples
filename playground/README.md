@@ -33,6 +33,9 @@ cd playground
 5. Wait 1 minute (`idleTTL: 1m`) → `bob`'s workspace is empty
 6. Show `solution.yaml` — two assets, one file, done
 
+> **Demo tip:** The **Install a Package** snippet (`pip install cowsay`) may take 5–15s on a cold
+> sandbox. Run it last, or run it once first to warm the package cache.
+
 ## Local development
 
 ```bash

@@ -1,3 +1,5 @@
+# Reference copy — deploy.sh builds the PUT body directly (image refs known only after build).
+# Keep this in sync with the spec in deploy.sh when changing env vars, egress, or sandboxing.
 apiVersion: hosting.sap.com/v1alpha1
 kind: SolutionDeployment
 metadata:

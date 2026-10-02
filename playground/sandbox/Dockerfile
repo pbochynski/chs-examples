@@ -1,3 +1,4 @@
+# Used for local dev/testing. Production builds use the inline dockerfile in build-config.json.
 FROM python:3.12-slim
 WORKDIR /app
 COPY runner.py .
