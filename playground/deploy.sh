@@ -49,14 +49,14 @@ RESPONSE=$(curl -sS -w '\n__HTTP_STATUS:%{http_code}' -X PUT \
         "env": [{"name": "JWT_SECRET", "value": "ch-playground-demo-secret"}],
         "sandboxing": {
           "tenantClaim": "sub",
-          "idleTTL": "1m"
-        },
-        "network": {
-          "egress": [
-            {"host": "pypi.org", "ports": [443]},
-            {"host": "files.pythonhosted.org", "ports": [443]},
-            {"host": "example.com", "ports": [443, 80]}
-          ]
+          "idleTTL": "1m",
+          "network": {
+            "egress": [
+              {"host": "pypi.org", "ports": [443]},
+              {"host": "files.pythonhosted.org", "ports": [443]},
+              {"host": "example.com", "ports": [443, 80]}
+            ]
+          }
         }
       }
     ]
