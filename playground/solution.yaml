@@ -1,0 +1,41 @@
+apiVersion: hosting.sap.com/v1alpha1
+kind: SolutionDeployment
+metadata:
+  name: playground
+  namespace: default
+spec:
+  solutionName: playground
+  version: 1.0.0
+  tenant: demo
+  regions:
+    - name: aws-eu-central-1
+  assets:
+    - id: app
+      kind: service
+      image: PLACEHOLDER_APP_IMAGE
+      port: 8000
+      env:
+        - name: JWT_SECRET
+          value: ch-playground-demo-secret
+        - name: SANDBOX_HOST
+          value: sandbox-sandbox-router:8080
+      requires:
+        - sandbox
+
+    - id: sandbox
+      kind: agent
+      image: PLACEHOLDER_SANDBOX_IMAGE
+      port: 8080
+      env:
+        - name: JWT_SECRET
+          value: ch-playground-demo-secret
+      sandboxing:
+        tenantClaim: sub
+        idleTTL: 1m
+      network:
+        egress:
+          allowedHosts:
+            - pypi.org
+            - files.pythonhosted.org
+            - example.com
+          allowedPorts: [443, 80]
