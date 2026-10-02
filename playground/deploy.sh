@@ -18,8 +18,8 @@ echo "    ZIP: $(du -h "$ZIP_FILE" | cut -f1)"
 echo "==> Uploading source..."
 UPLOAD=$(curl -sS -w '\n__HTTP_STATUS:%{http_code}' -X POST \
   -H "Authorization: Bearer $CH_TOKEN" \
-  -F "file=@$ZIP_FILE" \
   -F "name=playground" \
+  -F "file=@$ZIP_FILE" \
   "$CH_BASE_URL/projects/$CH_PROJECT/sources")
 HTTP_STATUS=$(echo "$UPLOAD" | grep -o '__HTTP_STATUS:[0-9]*' | cut -d: -f2)
 UPLOAD_BODY=$(echo "$UPLOAD" | sed 's/__HTTP_STATUS:[0-9]*$//')
