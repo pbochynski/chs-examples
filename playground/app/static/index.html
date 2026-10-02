@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Container Hosting Playground</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0d1117; --surface: #161b22; --border: #30363d;
+    --accent: #58a6ff; --green: #3fb950; --red: #f85149;
+    --text: #e6edf3; --muted: #8b949e; --font: 'Segoe UI', system-ui, sans-serif;
+    --mono: 'Cascadia Code', 'Fira Code', monospace;
+  }
+  body { background: var(--bg); color: var(--text); font-family: var(--font); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+  header { padding: 12px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+  header h1 { font-size: 1rem; font-weight: 600; color: var(--accent); }
+  header .badge { font-size: 0.75rem; background: #388bfd26; border: 1px solid #388bfd66; color: var(--accent); padding: 2px 8px; border-radius: 12px; }
+  #sandbox-badge { font-size: 0.75rem; color: var(--muted); margin-left: auto; font-family: var(--mono); }
+  .layout { display: grid; grid-template-columns: 220px 1fr 1fr; flex: 1; overflow: hidden; min-height: 0; }
+
+  .sidebar { border-right: 1px solid var(--border); display: flex; flex-direction: column; overflow: hidden; }
+  .sidebar h2 { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); padding: 12px 14px 6px; flex-shrink: 0; }
+  #session-list { flex: 1; overflow-y: auto; }
+  .session-item { padding: 7px 14px; cursor: pointer; font-size: 0.85rem; display: flex; align-items: center; gap: 6px; transition: background 0.1s; font-family: var(--mono); }
+  .session-item:hover { background: #ffffff0a; }
+  .session-item.active { background: #388bfd18; color: var(--accent); }
+  .session-item .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--muted); flex-shrink: 0; }
+  .session-item.active .dot { background: var(--green); }
+  .session-item .meta { margin-left: auto; font-size: 0.7rem; color: var(--muted); }
+  .sidebar-footer { padding: 10px 14px; border-top: 1px solid var(--border); display: flex; gap: 6px; flex-shrink: 0; }
+  #new-session-input { flex: 1; background: var(--surface); border: 1px solid var(--border); color: var(--text); padding: 5px 8px; border-radius: 4px; font-size: 0.8rem; font-family: var(--mono); min-width: 0; }
+  #new-session-input:focus { outline: none; border-color: var(--accent); }
+  #new-session-btn { background: #238636; border: none; color: #fff; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 0.8rem; font-weight: 600; flex-shrink: 0; }
+  #new-session-btn:hover { background: #2ea043; }
+
+  .editor-panel { border-right: 1px solid var(--border); display: flex; flex-direction: column; overflow: hidden; min-height: 0; }
+  #snippet-tabs { display: flex; flex-wrap: wrap; gap: 4px; padding: 10px 14px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+  .snippet-tab { background: var(--surface); border: 1px solid var(--border); color: var(--muted); padding: 4px 10px; border-radius: 4px; cursor: pointer; font-size: 0.78rem; transition: all 0.1s; }
+  .snippet-tab:hover { border-color: var(--accent); color: var(--text); }
+  .snippet-tab.active { border-color: var(--accent); color: var(--accent); background: #388bfd18; }
+  #code-editor { flex: 1; resize: none; background: var(--surface); border: none; color: var(--text); font-family: var(--mono); font-size: 0.85rem; padding: 14px; outline: none; line-height: 1.6; min-height: 0; }
+  .editor-footer { padding: 10px 14px; border-top: 1px solid var(--border); display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+  #run-btn { background: #238636; border: none; color: #fff; padding: 7px 20px; border-radius: 4px; cursor: pointer; font-size: 0.9rem; font-weight: 600; }
+  #run-btn:hover { background: #2ea043; }
+  #run-btn:disabled { background: #1f2e1f; color: var(--muted); cursor: not-allowed; }
+  #run-hint { font-size: 0.75rem; color: var(--muted); }
+
+  .output-panel { display: flex; flex-direction: column; overflow: hidden; min-height: 0; }
+  .output-panel > h2 { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); padding: 12px 14px 6px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+  #output-stdout { flex: 1; overflow-y: auto; padding: 14px; font-family: var(--mono); font-size: 0.82rem; line-height: 1.6; white-space: pre-wrap; word-break: break-all; min-height: 0; }
+  .out { color: var(--text); }
+  .err { color: var(--red); }
+  .meta-line { color: var(--muted); font-style: italic; display: block; margin-bottom: 6px; }
+  .empty { color: var(--muted); }
+  #files-section { border-top: 1px solid var(--border); padding: 10px 14px; flex-shrink: 0; max-height: 160px; overflow-y: auto; }
+  #files-section h3 { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin-bottom: 6px; }
+  .file-item { font-size: 0.8rem; font-family: var(--mono); color: #79c0ff; padding: 2px 0; display: flex; gap: 10px; align-items: baseline; }
+  .file-item .size { color: var(--muted); font-size: 0.75rem; }
+
+  @media (max-width: 900px) {
+    body { overflow: auto; height: auto; }
+    .layout { grid-template-columns: 1fr; overflow: visible; }
+    .sidebar { max-height: 220px; border-right: none; border-bottom: 1px solid var(--border); }
+    .editor-panel { border-right: none; border-bottom: 1px solid var(--border); min-height: 300px; }
+    .output-panel { min-height: 300px; }
+    #code-editor { min-height: 200px; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>Container Hosting Playground</h1>
+  <span class="badge">two assets &middot; one YAML &middot; zero Kubernetes</span>
+  <span id="sandbox-badge">sandbox: &mdash;</span>
+</header>
+<div class="layout">
+  <aside class="sidebar">
+    <h2>Sessions</h2>
+    <div id="session-list"></div>
+    <div class="sidebar-footer">
+      <input id="new-session-input" type="text" placeholder="session-id" autocomplete="off" spellcheck="false">
+      <button id="new-session-btn" title="Add session">+</button>
+    </div>
+  </aside>
+  <section class="editor-panel">
+    <div id="snippet-tabs"></div>
+    <textarea id="code-editor" spellcheck="false" placeholder="Write Python here or pick a snippet above..."></textarea>
+    <div class="editor-footer">
+      <button id="run-btn">&#9654; Run</button>
+      <span id="run-hint">Pick a snippet or write your own Python</span>
+    </div>
+  </section>
+  <section class="output-panel">
+    <h2>Output</h2>
+    <div id="output-stdout"><span class="empty">Run a snippet to see output here.</span></div>
+    <div id="files-section">
+      <h3>/workspace files</h3>
+      <div id="files-list"><span style="color:var(--muted);font-size:0.8rem">&mdash;</span></div>
+    </div>
+  </section>
+</div>
+<script src="app.js"></script>
+</body>
+</html>
