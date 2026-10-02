@@ -1,5 +1,5 @@
-# Reference copy — deploy.sh builds the PUT body directly (image refs known only after build).
-# Keep this in sync with the spec in deploy.sh when changing env vars, egress, or sandboxing.
+# Reference copy — keep in sync with the spec in deploy.sh when changing env vars, egress, or sandboxing.
+# Images are built by GitHub Actions: ghcr.io/pbochynski/chs-examples/playground-{app,sandbox}:latest
 apiVersion: hosting.sap.com/v1alpha1
 kind: SolutionDeployment
 metadata:
@@ -14,8 +14,11 @@ spec:
   assets:
     - id: app
       kind: service
-      image: PLACEHOLDER_APP_IMAGE
+      image: ghcr.io/pbochynski/chs-examples/playground-app:latest
       port: 8000
+      resources:
+        requests: {cpu: 100m, memory: 128Mi}
+        limits: {cpu: 500m, memory: 256Mi}
       env:
         - name: JWT_SECRET
           value: ch-playground-demo-secret
@@ -26,8 +29,11 @@ spec:
 
     - id: sandbox
       kind: agent
-      image: PLACEHOLDER_SANDBOX_IMAGE
+      image: ghcr.io/pbochynski/chs-examples/playground-sandbox:latest
       port: 8080
+      resources:
+        requests: {cpu: 100m, memory: 128Mi}
+        limits: {cpu: 500m, memory: 256Mi}
       env:
         - name: JWT_SECRET
           value: ch-playground-demo-secret

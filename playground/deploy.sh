@@ -28,6 +28,7 @@ RESPONSE=$(curl -sS -w '\n__HTTP_STATUS:%{http_code}' -X PUT \
       {
         "id": "app", "kind": "service",
         "image": "'"$APP_IMAGE"'", "port": 8000,
+        "resources": {"requests": {"cpu": "100m", "memory": "128Mi"}, "limits": {"cpu": "500m", "memory": "256Mi"}},
         "env": [
           {"name": "JWT_SECRET", "value": "ch-playground-demo-secret"},
           {"name": "SANDBOX_HOST", "value": "sandbox-sandbox-router:8080"}
@@ -37,6 +38,7 @@ RESPONSE=$(curl -sS -w '\n__HTTP_STATUS:%{http_code}' -X PUT \
       {
         "id": "sandbox", "kind": "agent",
         "image": "'"$SANDBOX_IMAGE"'", "port": 8080,
+        "resources": {"requests": {"cpu": "100m", "memory": "128Mi"}, "limits": {"cpu": "500m", "memory": "256Mi"}},
         "env": [{"name": "JWT_SECRET", "value": "ch-playground-demo-secret"}],
         "sandboxing": {"tenantClaim": "sub", "idleTTL": "1m"},
         "network": {"egress": {
