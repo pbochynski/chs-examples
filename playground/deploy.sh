@@ -28,7 +28,7 @@ RESPONSE=$(curl -sS -w '\n__HTTP_STATUS:%{http_code}' -X PUT \
         "image": "'"$APP_IMAGE"'",
         "port": 8000,
         "resources": {
-          "requests": {"cpu": "100m", "memory": "128Mi"},
+          "requests": {"cpu": "50m", "memory": "64Mi"},
           "limits": {"cpu": "500m", "memory": "256Mi"}
         },
         "env": [
@@ -43,7 +43,7 @@ RESPONSE=$(curl -sS -w '\n__HTTP_STATUS:%{http_code}' -X PUT \
         "image": "'"$SANDBOX_IMAGE"'",
         "port": 8080,
         "resources": {
-          "requests": {"cpu": "100m", "memory": "128Mi"},
+          "requests": {"cpu": "50m", "memory": "64Mi"},
           "limits": {"cpu": "500m", "memory": "256Mi"}
         },
         "env": [{"name": "JWT_SECRET", "value": "ch-playground-demo-secret"}],
