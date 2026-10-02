@@ -1,5 +1,7 @@
 # Playground — Container Hosting Demo
 
+![Build](https://github.com/pbochynski/chs-examples/actions/workflows/build.yml/badge.svg)
+
 **Two assets. One YAML. Zero Kubernetes.**
 
 A Python code playground where each user gets their own isolated sandbox.
@@ -7,7 +9,7 @@ Shows: per-user isolation, file persistence, package installation, ephemerality.
 
 ## Prerequisites
 
-- Access to a container-hosting project
+- Access to a container-hosting project (`CH_BASE_URL`, `CH_TOKEN`, `CH_PROJECT`)
 
 ## Deploy in 3 steps
 
@@ -17,11 +19,21 @@ export CH_BASE_URL=https://container-hosting.runtime.kyma.dev.sap
 export CH_TOKEN=<your-api-token>
 export CH_PROJECT=<your-project-id>
 
-# 2. Build and deploy
+# 2. Deploy
 cd playground
 ./deploy.sh
 
 # 3. Open the URL printed by deploy.sh
+```
+
+Images are built by GitHub Actions and published to
+`ghcr.io/pbochynski/chs-examples/playground-app:latest` and
+`ghcr.io/pbochynski/chs-examples/playground-sandbox:latest`.
+
+To deploy a local build, override the image refs:
+
+```bash
+APP_IMAGE=<your-app-image> SANDBOX_IMAGE=<your-sandbox-image> ./deploy.sh
 ```
 
 ## Demo script
