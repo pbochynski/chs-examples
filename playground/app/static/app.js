@@ -87,6 +87,15 @@ async function refreshMeta(sessionId, isActive) {
   try {
     const resp = await fetch(`/api/status/${encodeURIComponent(sessionId)}`);
     const data = await resp.json();
+    if (!resp.ok) {
+      el.textContent = '⚠';
+      if (isActive) {
+        const out = document.getElementById('output-stdout');
+        if (out.innerHTML === '<span class="empty">Run a snippet to see output here.</span>' || out.innerHTML === '') return;
+        // Only surface status errors when output panel is otherwise empty
+      }
+      return;
+    }
     const count = (data.files || []).length;
     el.textContent = count ? `${count} file${count !== 1 ? 's' : ''}` : '';
     if (isActive) renderFiles(data.files || []);
@@ -131,6 +140,10 @@ document.getElementById('run-btn').onclick = async () => {
       body: JSON.stringify({ session_id: sessionId, code }),
     });
     const data = await resp.json();
+    if (!resp.ok) {
+      out.innerHTML = `<span class="err">${escHtml(data.detail ?? String(data))}</span>`;
+      return;
+    }
     out.innerHTML = '';
     const meta = document.createElement('span');
     meta.className = 'meta-line';
@@ -160,7 +173,7 @@ document.getElementById('run-btn').onclick = async () => {
     renderFiles(data.files || []);
     refreshMeta(sessionId, true);
   } catch (e) {
-    out.innerHTML = `<span class="err">Error: ${escHtml(String(e))}</span>`;
+    out.innerHTML = `<span class="err">${escHtml(String(e))}</span>`;
   } finally {
     btn.disabled = false;
     btn.textContent = '▶ Run';
