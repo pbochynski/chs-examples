@@ -78,7 +78,7 @@ function renderSessions() {
     container.appendChild(div);
   });
   updateBadge();
-  sessions.forEach(s => refreshMeta(s.id, s.id === active));
+  if (active) refreshMeta(active, true);
 }
 
 async function refreshMeta(sessionId, isActive) {
