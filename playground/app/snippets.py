@@ -55,15 +55,13 @@ SNIPPETS = [
         "title": "Install a Package",
         "description": "pip install works — packages persist while sandbox is alive",
         "code": (
-            "import subprocess, sys, importlib\n\n"
+            "import subprocess, sys\n\n"
             "print('Installing cowsay...')\n"
             "result = subprocess.run(\n"
             "    [sys.executable, '-m', 'pip', 'install', 'cowsay', '-q'],\n"
             "    capture_output=True, text=True\n"
             ")\n"
             "print(result.stdout or '(installed)')\n\n"
-            "# Refresh the import cache so the freshly installed package is visible\n"
-            "importlib.invalidate_caches()\n\n"
             "import cowsay\n"
             "cowsay.cow('Hello from a freshly installed package!')"
         ),

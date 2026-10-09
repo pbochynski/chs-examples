@@ -1,5 +1,6 @@
 import os
 import re
+import site
 import subprocess
 import sys
 import time
@@ -66,12 +67,18 @@ def run_code(body: RunRequest, authorization: str | None = Header(default=None))
     if not code:
         raise HTTPException(400, "code must not be empty")
     workspace = _workspace(session_id)
+    # Include the user site-packages dir in PYTHONPATH so packages installed
+    # via `pip install --user` (the default for non-root) are importable in
+    # the same code block that ran the pip install.
+    user_site = site.getusersitepackages()
+    env = os.environ.copy()
+    env["PYTHONPATH"] = user_site + os.pathsep + env.get("PYTHONPATH", "")
     start = time.monotonic()
     try:
         result = subprocess.run(
             [sys.executable, "-c", code],
             capture_output=True, text=True,
-            timeout=10, cwd=workspace,
+            timeout=10, cwd=workspace, env=env,
         )
     except TimeoutExpired:
         duration_ms = int((time.monotonic() - start) * 1000)
