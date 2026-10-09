@@ -68,9 +68,12 @@ def run_code(body: RunRequest, authorization: str | None = Header(default=None))
         raise HTTPException(400, "code must not be empty")
     workspace = _workspace(session_id)
     # Include the user site-packages dir in PYTHONPATH so packages installed
-    # via `pip install --user` (the default for non-root) are importable in
-    # the same code block that ran the pip install.
+    # via `pip install --user` are importable in the same code block.
+    # Create the directory first — Python silently drops PYTHONPATH entries
+    # that don't exist at subprocess startup, so a first-ever pip install
+    # would create the dir but it wouldn't be on sys.path yet.
     user_site = site.getusersitepackages()
+    Path(user_site).mkdir(parents=True, exist_ok=True)
     env = os.environ.copy()
     env["PYTHONPATH"] = user_site + os.pathsep + env.get("PYTHONPATH", "")
     start = time.monotonic()
