@@ -3,6 +3,7 @@ name: Build and push playground images
 on:
   push:
     branches: [main]
+    tags: ['v*.*.*']
     paths:
       - "playground/app/**"
       - "playground/sandbox/**"
@@ -33,15 +34,38 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
+      - name: Docker metadata for playground-app
+        id: meta-app
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.REPO }}/playground-app
+          tags: |
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
+            type=sha,prefix=,format=short
+            type=raw,value=latest
+
+      - name: Docker metadata for playground-sandbox
+        id: meta-sandbox
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.REPO }}/playground-sandbox
+          tags: |
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
+            type=sha,prefix=,format=short
+            type=raw,value=latest
+
       - name: Build and push playground-app
         uses: docker/build-push-action@v6
         with:
           context: playground/app
           push: true
           platforms: linux/amd64,linux/arm64
-          tags: |
-            ${{ env.REGISTRY }}/${{ env.REPO }}/playground-app:latest
-            ${{ env.REGISTRY }}/${{ env.REPO }}/playground-app:${{ github.sha }}
+          tags: ${{ steps.meta-app.outputs.tags }}
+          labels: ${{ steps.meta-app.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -51,8 +75,7 @@ jobs:
           context: playground/sandbox
           push: true
           platforms: linux/amd64,linux/arm64
-          tags: |
-            ${{ env.REGISTRY }}/${{ env.REPO }}/playground-sandbox:latest
-            ${{ env.REGISTRY }}/${{ env.REPO }}/playground-sandbox:${{ github.sha }}
+          tags: ${{ steps.meta-sandbox.outputs.tags }}
+          labels: ${{ steps.meta-sandbox.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
